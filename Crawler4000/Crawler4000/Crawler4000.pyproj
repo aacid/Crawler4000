@@ -22,10 +22,16 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ConfigManager.py" />
+    <Compile Include="Source\ConfigManager.py" />
     <Compile Include="Crawler4000.py" />
-    <Compile Include="DBManager.py" />
-    <Compile Include="FBScrapper.py" />
+    <Compile Include="Source\DBManager.py" />
+    <Compile Include="Source\FBScrapper.py" />
+    <Compile Include="Source\Profile.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Source\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
