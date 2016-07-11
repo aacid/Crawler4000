@@ -1,4 +1,5 @@
 import sqlite3
+from Exceptions import NoMoreDataException
 
 class DBManager(object):
     """manages all interaction with DB"""
@@ -42,7 +43,19 @@ class DBManager(object):
         try:
             self.c.execute("INSERT INTO People VALUES (?, ?)", (id, name))
         except sqlite3.IntegrityError:
-            raise sqlite3.IntegrityError
+            pass
 
-                
-            
+    def getPersonWithNoProfile():
+        self.c.execute("SELECT id FROM People WHERE ProfileScrapped = 'N' LIMIT 1")
+        result = self.c.fetchone()
+        if result == None:
+            raise NoMoreDataException
+        return result
+    
+    def getPersonWithNoFriends():
+        self.c.execute("SELECT id FROM People WHERE FriendsScrapped = 'N' LIMIT 1")
+        result = self.c.fetchone()
+        if result == None:
+            raise NoMoreDataException
+        return result
+        

@@ -1,7 +1,7 @@
 import mechanize
 from bs4 import BeautifulSoup
 
-class FBScrapper(object):
+class FBManager(object):
     """Scrapping data from Facebook"""
     def __init__(self, fbLogin, fbPassword):
         self.login = fbLogin
@@ -30,5 +30,8 @@ class FBScrapper(object):
         soup = BeautifulSoup(response.read(), "html.parser")
         people = soup.find_all("h3", "_52jh")
         
+
+
+
 
 

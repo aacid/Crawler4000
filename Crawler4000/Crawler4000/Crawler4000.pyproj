@@ -25,7 +25,16 @@
     <Compile Include="Source\ConfigManager.py" />
     <Compile Include="Crawler4000.py" />
     <Compile Include="Source\DBManager.py" />
+    <Compile Include="Source\Exceptions.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Source\FBManager.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Source\FBScrapper.py" />
+    <Compile Include="Source\FriendManager.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Source\Profile.py">
       <SubType>Code</SubType>
     </Compile>
