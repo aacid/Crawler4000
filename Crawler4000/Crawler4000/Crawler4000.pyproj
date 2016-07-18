@@ -6,8 +6,7 @@
     <ProjectGuid>c92cfd28-d51d-4c46-820c-766ee30ba064</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>Crawler4000.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <SearchPath>source\</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Crawler4000</Name>
@@ -22,25 +21,24 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Source\ConfigManager.py" />
+    <Compile Include="source\ConfigManager.py" />
     <Compile Include="Crawler4000.py" />
-    <Compile Include="Source\DBManager.py" />
-    <Compile Include="Source\Exceptions.py">
+    <Compile Include="source\DBManager.py" />
+    <Compile Include="source\Exceptions.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Source\FBManager.py">
+    <Compile Include="source\FBManager.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Source\FBScrapper.py" />
-    <Compile Include="Source\FriendManager.py">
+    <Compile Include="source\FriendManager.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Source\Profile.py">
+    <Compile Include="source\__init__.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Source\" />
+    <Folder Include="source\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

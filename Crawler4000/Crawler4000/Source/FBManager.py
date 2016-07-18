@@ -1,10 +1,11 @@
-import mechanize
+import mechanize, re
 from bs4 import BeautifulSoup
-
+from FriendManager import FriendManager
+from Exceptions import CouldNotReadProfile
 class FBManager(object):
     """Scrapping data from Facebook"""
-    def __init__(self, fbLogin, fbPassword):
-        self.login = fbLogin
+    def __init__(self, fbUsername, fbPassword):
+        self.username = fbUsername
         self.password = fbPassword
         self.browser = mechanize.Browser()
 
@@ -19,19 +20,39 @@ class FBManager(object):
         url = "https://m.facebook.com/login.php"
         self.browser.open(url)
         self.browser.select_form(nr = 0)       #This is login-password form -> nr = number = 0
-        self.browser.form['email'] = login
-        self.browser.form['pass'] = password
+        self.browser.form['email'] = self.username
+        self.browser.form['pass'] = self.password
         self.browser.submit()
 
     def getFriends(self):
-        response = self.browser.open('https://m.facebook.com/friends/center/friends')
-        #print response.read()
 
-        soup = BeautifulSoup(response.read(), "html.parser")
-        people = soup.find_all("h3", "_52jh")
+        counter = 0   
+        friends = FriendManager()
+
+        while True:
+            response = self.browser.open('https://m.facebook.com/friends/center/friends/?ppk=' + str(counter))
+
+            data = response.read()
+            soup = BeautifulSoup(data, "html.parser")
+            people = soup.find(id="friends_center_main")
         
 
+            if people.h3.string != 'Friends':
+                raise CouldNotReadProfile
+            if len(people.contents) < 3:
+                break
+            for friend in people.contents[2]:
+                url = friend.a['href']
+                match = re.search(r'\?uid=(\d*)', url)
+                if match:
+                    url = match.group(1)
+                name = friend.a.text
+                friends.addProfile(url, name)
+
+            counter += 1
+
+        #friends.save()
 
 
 
-
+        

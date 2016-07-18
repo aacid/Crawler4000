@@ -1,5 +1,5 @@
 import sqlite3
-from Exceptions import NoMoreDataException
+from source.Exceptions import NoMoreDataException
 
 class DBManager(object):
     """manages all interaction with DB"""
