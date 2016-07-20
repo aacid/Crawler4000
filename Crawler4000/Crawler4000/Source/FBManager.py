@@ -14,7 +14,8 @@ class FBManager(object):
         self.browser.set_handle_robots(False)
         cookies = mechanize.CookieJar()
         self.browser.set_cookiejar(cookies)
-        self.browser.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.7 (KHTML, like Gecko) Chrome/7.0.517.41 Safari/534.7')]
+        self.browser.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'),
+                                   ('Accept-language', 'en-US,en;q=0.8,sk;q=0.6')]
         self.browser.set_handle_refresh(False)
 
         url = "https://m.facebook.com/login.php"
@@ -28,31 +29,34 @@ class FBManager(object):
 
         counter = 0   
         friends = FriendManager()
-
+        
+        profile_links = []
         while True:
             response = self.browser.open('https://m.facebook.com/friends/center/friends/?ppk=' + str(counter))
 
-            data = response.read()
-            soup = BeautifulSoup(data, "html.parser")
-            people = soup.find(id="friends_center_main")
-        
-
-            if people.h3.string != 'Friends':
-                raise CouldNotReadProfile
-            if len(people.contents) < 3:
+            link = None
+            for link in self.browser.links(url_regex=r".*hovercard.*"):
+                profile_links.append(link.url)
+            
+            if link == None:
                 break
-            for friend in people.contents[2]:
-                url = friend.a['href']
-                match = re.search(r'\?uid=(\d*)', url)
-                if match:
-                    url = match.group(1)
-                name = friend.a.text
-                friends.addProfile(url, name)
 
             counter += 1
+
+        for link in profile_links:
+            response = self.browser.open(link)
+            fbid = self.processHoverCard(response.read())
+            friends.addProfile(fbid[0], fbid[1])
+
 
         #friends.save()
 
 
-
+    def processHoverCard(self, card):
+        soup = BeautifulSoup(card, "html.parser")
+        name = soup.h1.string
+        link_tag = soup.find(string=re.compile("View.Profile"))
+        match = re.search(r'\/(.*)\?', link_tag.parent.parent['href'])
+        if match:
+            return ( match.group(1), name)
         

@@ -1,0 +1,8 @@
+saving
+- save each profile with its friends (2 tables)
+- table profiles -> names, ids 
+- table connections -> who is friend
+
+encapsulate profile reading.
+- should be able to save any profile
+
