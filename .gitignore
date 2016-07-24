@@ -67,3 +67,4 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+/Crawler4000/Crawler4000/profile.html

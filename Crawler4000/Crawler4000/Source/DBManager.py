@@ -48,14 +48,10 @@ class DBManager(object):
     def getPersonWithNoProfile():
         self.c.execute("SELECT id FROM People WHERE ProfileScrapped = 'N' LIMIT 1")
         result = self.c.fetchone()
-        if result == None:
-            raise NoMoreDataException
         return result
     
     def getPersonWithNoFriends():
         self.c.execute("SELECT id FROM People WHERE FriendsScrapped = 'N' LIMIT 1")
         result = self.c.fetchone()
-        if result == None:
-            raise NoMoreDataException
         return result
         

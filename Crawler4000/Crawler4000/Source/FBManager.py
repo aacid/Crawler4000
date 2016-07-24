@@ -8,6 +8,7 @@ class FBManager(object):
         self.username = fbUsername
         self.password = fbPassword
         self.browser = mechanize.Browser()
+        self.friends = FriendManager(self)
 
     def login(self):
         
@@ -25,10 +26,13 @@ class FBManager(object):
         self.browser.form['pass'] = self.password
         self.browser.submit()
 
+    def getPage(self, page):
+        response = self.browser.open(page)
+        return response.read()
+
     def getFriends(self):
 
         counter = 0   
-        friends = FriendManager()
         
         profile_links = []
         while True:
@@ -45,18 +49,21 @@ class FBManager(object):
 
         for link in profile_links:
             response = self.browser.open(link)
-            fbid = self.processHoverCard(response.read())
-            friends.addProfile(fbid[0], fbid[1])
+            fbid = self.getIdFromHoverCard(response.read())
+            self.friends.addProfile(fbid[0], fbid[1])
 
 
         #friends.save()
 
 
-    def processHoverCard(self, card):
+    def getIdFromHoverCard(self, card):
         soup = BeautifulSoup(card, "html.parser")
         name = soup.h1.string
         link_tag = soup.find(string=re.compile("View.Profile"))
         match = re.search(r'\/(.*)\?', link_tag.parent.parent['href'])
         if match:
             return ( match.group(1), name)
+
+    def addProfile(self, id):
+        self.friends.addProfile(id)
         
