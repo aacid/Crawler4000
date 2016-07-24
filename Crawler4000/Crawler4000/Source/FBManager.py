@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from FriendManager import FriendManager
 from Exceptions import CouldNotReadProfile
 class FBManager(object):
-    """Scrapping data from Facebook"""
+    """Scraping data from Facebook"""
     def __init__(self, db):
         self.db = db
         self.browser = mechanize.Browser()
@@ -36,19 +36,21 @@ class FBManager(object):
             if person_id == None:
                 return
             counter += 1
-            self.scrappeFriends(person_id[0])
+            self.scrapeFriends(person_id[0])
 
-    def scrappeFriends(self, id):
+    def scrapeFriends(self, id):
         person = FriendManager(id)
         person.getFriends(self.browser)
         person.save(self.db)
 
-    def getIdFromHoverCard(self, card):
-        soup = BeautifulSoup(card, "html.parser")
-        link_tag = soup.find(string=re.compile("View.Profile"))
-        match = re.search(r'\/(.*)\?', link_tag.parent.parent['href'])
-        if match:
-            return match.group(1)
+    def scrapeProfiles(self):
+        counter = 0
+        while counter < 1000:
+            person_id = self.db.getPersonWithNoFriends()
+            if person_id == None:
+                return
+            counter += 1
+            self.scrapeFriends(person_id[0])
 
     def addProfile(self, id, name):
         self.db.addPerson(id, name)

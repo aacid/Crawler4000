@@ -7,16 +7,16 @@ class Crawler4000(object):
     def __init__(self):
         self.config = ConfigManager()
         self.db = DBManager()
-        self.initScrapper()
+        self.scraper = FBManager(self.db)
+        self.initScraper()
 
-    def initScrapper(self):
+    def initScraper(self):
         login = self.config.getFBLogin()
         password = self.config.getFBPassword()
 
-        self.scrapper = FBManager(self.db)
-        self.scrapper.login(login, password)
-
-        self.scrapper.addProfile('ooliver', 'Oliver Cernansky')
-        self.scrapper.crawl()
-
+        
+        self.scraper.login(login, password)
+        self.scraper.addProfile('ooliver', 'Oliver Cernansky')
+        self.scraper.crawl()
+        #self.scraper.scrapeProfiles()
 diplo = Crawler4000()

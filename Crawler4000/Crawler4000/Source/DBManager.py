@@ -21,8 +21,9 @@ class DBManager(object):
             self.c.execute("""CREATE TABLE `People` (
                                 `id`	TEXT NOT NULL UNIQUE,
                                 `Name`	TEXT,
-                                `ProfileScrapped`	TEXT DEFAULT 'N',
-                                `FriendsScrapped`	TEXT DEFAULT 'N',
+                                `ProfileScraped`	TEXT DEFAULT 'N',
+                                `FriendsScraped`	TEXT DEFAULT 'N',
+                                `NumberOfFriends`	INTEGER,
                                 PRIMARY KEY(id)
                             );""")
         elif name == 'Friends':
@@ -50,13 +51,10 @@ class DBManager(object):
     def Commit(self):
         self.conn.commit()
 
-    def addPerson(self, id, name, scrapped = False):
-        if scrapped:
-            is_scrapped = 'Y'
-        else:
-            is_scrapped = 'N'
+    def addPerson(self, id, name, scraped = False):
+        is_scraped = 'Y' if scraped else 'N'
         try:
-            self.c.execute("INSERT OR IGNORE INTO People (id, Name, ProfileScrapped) VALUES (?, ?, ?)", (id, name, is_scrapped))
+            self.c.execute("INSERT OR IGNORE INTO People (id, Name, ProfileScraped) VALUES (?, ?, ?)", (id, name, is_scraped))
         except sqlite3.Error as er:
             print 'er:', er.message
 
@@ -77,19 +75,22 @@ class DBManager(object):
         except sqlite3.Error as er:
             print 'er:', er.message
 
-    def setPersonFriendScrapped(self, id):
+    def setPersonScraped(self, id, friends = False, profile = False):
+        friends_scraped = 'Y' if friends else 'N'
+        profile_scraped = 'Y' if profile else 'N'
+
         try:
-            self.c.execute("UPDATE People SET FriendsScrapped = 'Y' WHERE id = ?", (id,))
+            self.c.execute("UPDATE People SET FriendsScraped = ?, ProfileScraped = ? WHERE id = ?", (friends_scraped, profile_scraped, id))
         except sqlite3.Error as er:
             print 'er:', er.message
 
     def getPersonWithNoProfile(self):
-        self.c.execute("SELECT id FROM People WHERE ProfileScrapped = 'N' LIMIT 1")
+        self.c.execute("SELECT id FROM People WHERE ProfileScraped = 'N' LIMIT 1")
         result = self.c.fetchone()
         return result
     
     def getPersonWithNoFriends(self):
-        self.c.execute("SELECT id FROM People WHERE FriendsScrapped = 'N' LIMIT 1")
+        self.c.execute("SELECT id FROM People WHERE FriendsScraped = 'N' LIMIT 1")
         result = self.c.fetchone()
         return result
         

@@ -7,8 +7,8 @@ class Profile(object):
     def __init__(self, id, name):
         self.id = id
         self.name = name
-        self.scrapped = False
-        self.friends_scrapped = False
+        self.scraped = False
+        self.friends_scraped = False
         self.workplaces = []
         self.education = []
         self.living = []
@@ -21,11 +21,11 @@ class Profile(object):
     def __eq__(self, other):
         return hash(self) == hash(other)
 
-    def isScrapped(self):
-        return self.scrapped
+    def isScraped(self):
+        return self.scraped
 
     def save(self, db):
-        if not self.scrapped:
+        if not self.scraped:
             db.addPerson(self.id, self.name)
         else:
             db.addPerson(self.id, self.name, True)
@@ -50,9 +50,9 @@ class Profile(object):
             db.addPersonalInfo(self.id, info_list)
 
 
-    def scrapeProfile(self, scrapper):        
+    def scrapeProfile(self, scraper):        
         url = 'https://m.facebook.com/' + self.id + '/about'
-        data = scrapper.getPage(url)
+        data = scraper.getPage(url)
         #debug to load profile offline
         #f = open('D:\Dropbox\Projekty\Crawler4000\Crawler4000\Crawler4000\profile.html', 'r')
         data = f.read()

@@ -3,7 +3,7 @@ from source.Profile import Profile
 from bs4 import BeautifulSoup
 
 class FriendManager(object):
-    """manages all profiles scrapped"""
+    """manages all profiles scraped"""
 
     def __init__(self, id):
         self.id = id
@@ -14,7 +14,6 @@ class FriendManager(object):
 
     def addProfile(self, id, name):
         profile = Profile(id, name)
-        #profile.scrapeProfile(self.scrapper)
         self.profiles.append(profile)
 
     def getFriends(self, browser):
@@ -56,10 +55,10 @@ class FriendManager(object):
                 fbid = ''
             self.addProfile(fbid, name)
 
-        print "scrapped " + str(counter) + ", could not scrappe " + str(locked) + " profiles"
+        print "scraped " + str(counter) + ", could not scrape " + str(locked) + " profiles"
         
     def save(self, db):
-        db.setPersonFriendScrapped(self.id)
+        db.setPersonScraped(self.id, True)
 
         print "saving " + str(len(self.profiles)) + " profiles"
         if len(self.profiles) == 0:
