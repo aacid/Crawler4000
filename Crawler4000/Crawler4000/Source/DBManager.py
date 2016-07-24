@@ -47,6 +47,9 @@ class DBManager(object):
                 self.createTable(table)
 
 
+    def Commit(self):
+        self.conn.commit()
+
     def addPerson(self, id, name, scrapped = False):
         if scrapped:
             is_scrapped = 'Y'
@@ -68,12 +71,24 @@ class DBManager(object):
         except sqlite3.Error as er:
             print 'er:', er.message
 
-    def getPersonWithNoProfile():
+    def createConnection(self, id, friend):
+        try:
+            self.c.execute("INSERT OR IGNORE INTO Friends (Person, Friend) VALUES (?, ?)", (id, friend))
+        except sqlite3.Error as er:
+            print 'er:', er.message
+
+    def setPersonFriendScrapped(self, id):
+        try:
+            self.c.execute("UPDATE People SET FriendsScrapped = 'Y' WHERE id = ?", (id,))
+        except sqlite3.Error as er:
+            print 'er:', er.message
+
+    def getPersonWithNoProfile(self):
         self.c.execute("SELECT id FROM People WHERE ProfileScrapped = 'N' LIMIT 1")
         result = self.c.fetchone()
         return result
     
-    def getPersonWithNoFriends():
+    def getPersonWithNoFriends(self):
         self.c.execute("SELECT id FROM People WHERE FriendsScrapped = 'N' LIMIT 1")
         result = self.c.fetchone()
         return result

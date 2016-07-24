@@ -7,7 +7,7 @@ class FBManager(object):
     def __init__(self, db):
         self.db = db
         self.browser = mechanize.Browser()
-        self.friends = FriendManager()
+        #self.friends = FriendManager()
 
     def login(self, fb_username, fb_password):
         
@@ -28,61 +28,28 @@ class FBManager(object):
     def getPage(self, page):
         response = self.browser.open(page)
         return response.read()
-
-    def getFriendsFromProfile(self, id):
-
-        counter = 0
-        locked = 0
         
-        profile_links = []
-        while True:
-            try:
-                response = self.browser.open('https://m.facebook.com/' + id + "/friends?startindex=" + str(counter))
-                data = response.read()
-                link = None
+    def crawl(self):
+        counter = 0
+        while counter < 1000:
+            person_id = self.db.getPersonWithNoFriends()
+            if person_id == None:
+                return
+            counter += 1
+            self.scrappeFriends(person_id[0])
 
-                soup = BeautifulSoup(data, "html.parser")
-                soup = soup.find(id='objects_container')
-                tables = soup.find_all('tbody')
-
-                if len(tables) == 0:
-                    break
-                for table in tables:
-                    link = table.find('a')
-                    if link.has_attr('href'):
-                        profile_links.append((unicode(link.contents[0]), link['href']))
-                    else:
-                        locked += 1
-                    counter += 1
-                #for link in self.browser.links(url_regex=r".*hovercard.*"):
-                #    profile_links.append(link.url)        
-                #    counter += 1
-            except:
-                print("Unexpected error:", sys.exc_info()[0])
-            
-        for name, link in profile_links:
-            if "profile.php" in link:
-                match = re.search(r'\/(.*)\&', link)
-            else:
-                match = re.search(r'\/(.*)\?', link)
-            if match:
-                fbid = match.group(1)
-            else:
-                fbid = ''
-            self.friends.addProfile(fbid, name)
-
-
-        self.friends.save(self.db)
-
+    def scrappeFriends(self, id):
+        person = FriendManager(id)
+        person.getFriends(self.browser)
+        person.save(self.db)
 
     def getIdFromHoverCard(self, card):
         soup = BeautifulSoup(card, "html.parser")
-        #name = soup.h1.string
         link_tag = soup.find(string=re.compile("View.Profile"))
         match = re.search(r'\/(.*)\?', link_tag.parent.parent['href'])
         if match:
             return match.group(1)
 
-    def addProfile(self, id):
-        self.friends.addProfile(id)
+    def addProfile(self, id, name):
+        self.db.addPerson(id, name)
         

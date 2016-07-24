@@ -15,9 +15,8 @@ class Crawler4000(object):
 
         self.scrapper = FBManager(self.db)
         self.scrapper.login(login, password)
-        self.scrapper.getFriendsFromProfile('5c0.lukas.cerny')
-        #self.friends = FriendManager(self.scrapper)
-        #self.friends.addProfile('martin.lukacka')
+
+        self.scrapper.addProfile('ooliver', 'Oliver Cernansky')
+        self.scrapper.crawl()
 
 diplo = Crawler4000()
-diplo.initScrapper()
