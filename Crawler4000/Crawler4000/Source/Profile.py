@@ -1,19 +1,54 @@
 from bs4 import BeautifulSoup
 import re
+from source.DBManager import DBManager
 class Profile(object):
     """description of class"""
 
-    def __init__(self, id):
+    def __init__(self, id, name):
         self.id = id
+        self.name = name
         self.scrapped = False
+        self.friends_scrapped = False
         self.workplaces = []
         self.education = []
         self.living = []
         self.contacts = []
-        self.basicinfo = []
+        self.basic_info = []
+    
+    def __hash__(self):
+        return hash(repr(self))
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
 
     def isScrapped(self):
         return self.scrapped
+
+    def save(self, db):
+        if not self.scrapped:
+            db.addPerson(self.id, self.name)
+        else:
+            db.addPerson(self.id, self.name, True)
+
+            info_list = []
+
+            for workplace in self.workplaces:
+                info_list.append(('Workplace', '', workplace))
+
+            for edu in self.education:
+                info_list.append(('Education', '', edu))
+
+            for liv in self.living:
+                info_list.append(('Living', '', liv))
+
+            for contact in self.contacts:
+                info_list.append(('Contact', contact[0], contact[1]))
+
+            for basic in self.basic_info:
+                info_list.append(('BasicInfo', basic[0], basic[1]))
+
+            db.addPersonalInfo(self.id, info_list)
+
 
     def scrapeProfile(self, scrapper):        
         url = 'https://m.facebook.com/' + self.id + '/about'
@@ -75,5 +110,5 @@ class Profile(object):
                 if sibling == '\n':
                     continue
                 val = sibling.stripped_strings.next()
-                self.basicinfo.append((content, val))
+                self.basic_info.append((content, val))
                 break

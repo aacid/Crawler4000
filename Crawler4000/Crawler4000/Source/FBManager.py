@@ -1,16 +1,15 @@
-import mechanize, re
+import mechanize, re, sys
 from bs4 import BeautifulSoup
 from FriendManager import FriendManager
 from Exceptions import CouldNotReadProfile
 class FBManager(object):
     """Scrapping data from Facebook"""
-    def __init__(self, fbUsername, fbPassword):
-        self.username = fbUsername
-        self.password = fbPassword
+    def __init__(self, db):
+        self.db = db
         self.browser = mechanize.Browser()
-        self.friends = FriendManager(self)
+        self.friends = FriendManager()
 
-    def login(self):
+    def login(self, fb_username, fb_password):
         
         self.browser.set_handle_robots(False)
         cookies = mechanize.CookieJar()
@@ -22,47 +21,67 @@ class FBManager(object):
         url = "https://m.facebook.com/login.php"
         self.browser.open(url)
         self.browser.select_form(nr = 0)       #This is login-password form -> nr = number = 0
-        self.browser.form['email'] = self.username
-        self.browser.form['pass'] = self.password
+        self.browser.form['email'] = fb_username
+        self.browser.form['pass'] = fb_password
         self.browser.submit()
 
     def getPage(self, page):
         response = self.browser.open(page)
         return response.read()
 
-    def getFriends(self):
+    def getFriendsFromProfile(self, id):
 
-        counter = 0   
+        counter = 0
+        locked = 0
         
         profile_links = []
         while True:
-            response = self.browser.open('https://m.facebook.com/friends/center/friends/?ppk=' + str(counter))
+            try:
+                response = self.browser.open('https://m.facebook.com/' + id + "/friends?startindex=" + str(counter))
+                data = response.read()
+                link = None
 
-            link = None
-            for link in self.browser.links(url_regex=r".*hovercard.*"):
-                profile_links.append(link.url)
+                soup = BeautifulSoup(data, "html.parser")
+                soup = soup.find(id='objects_container')
+                tables = soup.find_all('tbody')
+
+                if len(tables) == 0:
+                    break
+                for table in tables:
+                    link = table.find('a')
+                    if link.has_attr('href'):
+                        profile_links.append((unicode(link.contents[0]), link['href']))
+                    else:
+                        locked += 1
+                    counter += 1
+                #for link in self.browser.links(url_regex=r".*hovercard.*"):
+                #    profile_links.append(link.url)        
+                #    counter += 1
+            except:
+                print("Unexpected error:", sys.exc_info()[0])
             
-            if link == None:
-                break
+        for name, link in profile_links:
+            if "profile.php" in link:
+                match = re.search(r'\/(.*)\&', link)
+            else:
+                match = re.search(r'\/(.*)\?', link)
+            if match:
+                fbid = match.group(1)
+            else:
+                fbid = ''
+            self.friends.addProfile(fbid, name)
 
-            counter += 1
 
-        for link in profile_links:
-            response = self.browser.open(link)
-            fbid = self.getIdFromHoverCard(response.read())
-            self.friends.addProfile(fbid[0], fbid[1])
-
-
-        #friends.save()
+        self.friends.save(self.db)
 
 
     def getIdFromHoverCard(self, card):
         soup = BeautifulSoup(card, "html.parser")
-        name = soup.h1.string
+        #name = soup.h1.string
         link_tag = soup.find(string=re.compile("View.Profile"))
         match = re.search(r'\/(.*)\?', link_tag.parent.parent['href'])
         if match:
-            return ( match.group(1), name)
+            return match.group(1)
 
     def addProfile(self, id):
         self.friends.addProfile(id)

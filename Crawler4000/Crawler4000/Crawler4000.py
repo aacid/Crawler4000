@@ -13,11 +13,11 @@ class Crawler4000(object):
         login = self.config.getFBLogin()
         password = self.config.getFBPassword()
 
-        self.scrapper = FBManager(login, password)
-        #self.scrapper.login()
-        #self.scrapper.getFriends()
-        self.friends = FriendManager(self.scrapper)
-        self.friends.addProfile('martin.lukacka')
+        self.scrapper = FBManager(self.db)
+        self.scrapper.login(login, password)
+        self.scrapper.getFriendsFromProfile('5c0.lukas.cerny')
+        #self.friends = FriendManager(self.scrapper)
+        #self.friends.addProfile('martin.lukacka')
 
 diplo = Crawler4000()
 diplo.initScrapper()

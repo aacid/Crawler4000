@@ -4,7 +4,7 @@ from source.Exceptions import NoMoreDataException
 class DBManager(object):
     """manages all interaction with DB"""
 
-    tables = ['People', 'Friends']
+    tables = ['People', 'Friends', 'PersonalInfo']
 
     def __init__(self):
         self.conn = sqlite3.connect("data.db")
@@ -31,6 +31,14 @@ class DBManager(object):
                                 `Friend`	TEXT NOT NULL,
                                 PRIMARY KEY(Person,Friend)
                             );""")
+        elif name == 'PersonalInfo':
+            self.c.execute("""CREATE TABLE `PersonalInfo` (
+                                `IdPerson`	TEXT NOT NULL,
+                                `Type`	TEXT NOT NULL,
+                                `Name`	TEXT,
+                                `Info`	TEXT NOT NULL,
+                                PRIMARY KEY(IdPerson,Type,Info)
+                            );""")
 
     def checkConsistency(self):
         for table in self.tables:
@@ -39,11 +47,26 @@ class DBManager(object):
                 self.createTable(table)
 
 
-    def addPerson(self, id, name):
+    def addPerson(self, id, name, scrapped = False):
+        if scrapped:
+            is_scrapped = 'Y'
+        else:
+            is_scrapped = 'N'
         try:
-            self.c.execute("INSERT INTO People VALUES (?, ?)", (id, name))
-        except sqlite3.IntegrityError:
-            pass
+            self.c.execute("INSERT OR IGNORE INTO People (id, Name, ProfileScrapped) VALUES (?, ?, ?)", (id, name, is_scrapped))
+        except sqlite3.Error as er:
+            print 'er:', er.message
+
+    def addPersons(self, list):
+        query =  "INSERT OR IGNORE INTO People VALUES"
+        for person in list:
+            query += " (" + list[0] + ", " + list[1] + "),"
+        query = query[:-1] + ";"
+
+        try:
+            self.c.execute(query)
+        except sqlite3.Error as er:
+            print 'er:', er.message
 
     def getPersonWithNoProfile():
         self.c.execute("SELECT id FROM People WHERE ProfileScrapped = 'N' LIMIT 1")
@@ -55,3 +78,13 @@ class DBManager(object):
         result = self.c.fetchone()
         return result
         
+    def addPersonalInfo(self, person_id, list):
+        query =  "INSERT OR IGNORE INTO PersonalInfo (IdPerson, Type, Name, Info) VALUES"
+        for person in list:
+            query += " (" + person_id + ", " + list[0] + ", " + list[1] + ", " + list[2] + "),"
+        query = query[:-1] + ";"
+
+        try:
+            self.c.execute(query)
+        except sqlite3.Error as er:
+            print 'er:', er.message
