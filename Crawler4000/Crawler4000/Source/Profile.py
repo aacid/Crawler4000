@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 import re
-from source.DBManager import DBManager
 class Profile(object):
     """description of class"""
 
@@ -14,22 +13,20 @@ class Profile(object):
         self.living = []
         self.contacts = []
         self.basic_info = []
+        
+    @staticmethod
+    def loadProfile(id, db):
+        name, profile_scraped, friends_scraped = db.getPerson(id)
+
+        profile = Profile(id, name)
+        profile.scraped = profile_scraped == 'Y'
+        profile.friends_scraped = friends_scraped == 'Y'
+        return profile
     
-    def __hash__(self):
-        return hash(repr(self))
-
-    def __eq__(self, other):
-        return hash(self) == hash(other)
-
-    def isScraped(self):
-        return self.scraped
-
     def save(self, db):
-        if not self.scraped:
-            db.addPerson(self.id, self.name)
-        else:
-            db.addPerson(self.id, self.name, True)
-
+        db.addPerson(self.id, self.name)
+        
+        if self.scraped:
             info_list = []
 
             for workplace in self.workplaces:
@@ -38,77 +35,105 @@ class Profile(object):
             for edu in self.education:
                 info_list.append(('Education', '', edu))
 
-            for liv in self.living:
-                info_list.append(('Living', '', liv))
+            for name, value in self.living:
+                info_list.append(('Living', name, value))
 
-            for contact in self.contacts:
-                info_list.append(('Contact', contact[0], contact[1]))
+            for name, value in self.contacts:
+                info_list.append(('Contact', name, value))
 
-            for basic in self.basic_info:
-                info_list.append(('BasicInfo', basic[0], basic[1]))
+            for name, value in self.basic_info:
+                info_list.append(('BasicInfo', name, value))
 
-            db.addPersonalInfo(self.id, info_list)
+            list = [ (self.id,) + x for x in info_list ]
+            db.addPersonalInfo(self.id, list)
+            print "saved " + str(len(list)) + " details"
 
 
-    def scrapeProfile(self, scraper):        
-        url = 'https://m.facebook.com/' + self.id + '/about'
-        data = scraper.getPage(url)
-        #debug to load profile offline
-        #f = open('D:\Dropbox\Projekty\Crawler4000\Crawler4000\Crawler4000\profile.html', 'r')
-        data = f.read()
-        self.scrapeAbout(data)
+    def scrapeProfile(self, browser):    
+        print "scraping profile " + self.id
+        if 'profile' in self.id:
+            url = 'https://m.facebook.com/' + self.id.replace('?', '?v=info&')
+        else:
+            url = 'https://m.facebook.com/' + self.id + '/about'  
+        try:      
+            response = browser.open(url)
+            data = response.read()
+            self.scrapeAbout(data)
+        except:
+            pass
+
+        self.scraped = True
 
     def scrapeAbout(self, data):        
         soup = BeautifulSoup(data, "html.parser")
 
         #work
         div = soup.find(id='work')
-        spans = div.find_all("span")
+        if div != None:
+            spans = div.find_all("span")
 
-        for span in spans:
-            self.workplaces.append(unicode(span.a.contents))
+            for span in spans:
+                if len(span.contents) == 0:
+                    continue
+                content = span.contents[0]
+                while content.name != None:
+                    if len(content.contents) == 0:
+                        break
+                    content = content.contents[0]
+                if "Ask" in content or "requested" in content:
+                    continue
+                self.workplaces.append(content)
 
         #education
         div = soup.find(id='education')
-        spans = div.find_all('a')
+        if div != None:
+            spans = div.find_all('a')
 
-        for span in spans:
-            if span.has_attr('class'):
-                continue
-            self.education.append(unicode(span.contents))
+            for span in spans:
+                if span.has_attr('class'):
+                    continue
+                self.education.append(span.contents[0])
 
         #living
         div = soup.find(id='living')
-        spans = div.find_all("a")
+        if div != None:
+            spans = div.find_all("a", href=re.compile(r'profile'))
 
-        for span in spans:
-            self.living.append(unicode(span.contents))
+            for span in spans:
+                if "Ask" in span.text or "requested" in span.text:
+                    continue
+                name = span.parent.parent.parent.parent.parent['title']
+                self.living.append((name, span.contents[0]))
 
         #contact-info
         div = soup.find(id='contact-info')
-        spans = div.find_all('span')
-        for span in spans:
-            content = unicode(span.contents)
-            if "Ask" in content or "requested" in content:
-                continue
-            for sibling in span.parent.parent.next_siblings:
-                ty = type(sibling)
-                if sibling == '\n':
+        if div != None:
+            spans = div.find_all('span')
+            for span in spans:
+                content = span.contents[0]
+                if "Ask" in content or "requested" in content:
                     continue
-                val = sibling.stripped_strings.next()
-                self.contacts.append((content, val))
-                break
+                for sibling in span.parent.parent.next_siblings:
+                    if sibling == '\n':
+                        continue
+                    val = sibling.stripped_strings.next()
+                    self.contacts.append((content, val))
+                    break
         
         #basic-info
         div = soup.find(id='basic-info')
-        spans = div.find_all('span')
-        for span in spans:
-            content = unicode(span.contents)
-            if "Ask" in content or "requested" in content:
-                continue
-            for sibling in span.parent.parent.next_siblings:
-                if sibling == '\n':
+        if div != None:
+            spans = div.find_all('span')
+            for span in spans:
+                content = span.contents[0]
+                if "Ask" in content or "requested" in content:
                     continue
-                val = sibling.stripped_strings.next()
-                self.basic_info.append((content, val))
-                break
+                for sibling in span.parent.parent.next_siblings:
+                    if sibling == '\n':
+                        continue
+                    try:
+                        val = sibling.stripped_strings.next()
+                    except StopIteration:
+                        continue
+                    self.basic_info.append((content, val))
+                    break

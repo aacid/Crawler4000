@@ -9,9 +9,6 @@ class FriendManager(object):
         self.id = id
         self.profiles = []
 
-    def addProfile(self, profile):
-        self.profiles.add(profile)
-
     def addProfile(self, id, name):
         profile = Profile(id, name)
         self.profiles.append(profile)
@@ -58,7 +55,7 @@ class FriendManager(object):
         print "scraped " + str(counter) + ", could not scrape " + str(locked) + " profiles"
         
     def save(self, db):
-        db.setPersonScraped(self.id, True)
+        db.setPersonFriendsScraped(self.id)
 
         print "saving " + str(len(self.profiles)) + " profiles"
         if len(self.profiles) == 0:

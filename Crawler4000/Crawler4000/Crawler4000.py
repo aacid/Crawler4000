@@ -5,18 +5,22 @@ from source.FriendManager import FriendManager
 
 class Crawler4000(object):
     def __init__(self):
+        print 'Initializing Facebook scraper.'
         self.config = ConfigManager()
         self.db = DBManager()
-        self.scraper = FBManager(self.db)
-        self.initScraper()
+        if self.db.isConnected():
+            self.scraper = FBManager(self.db)
+            self.initScraper()
 
     def initScraper(self):
-        login = self.config.getFBLogin()
-        password = self.config.getFBPassword()
+        if self.config.isLoaded():
+            login = self.config.getFBLogin()
+            password = self.config.getFBPassword()
+        else:
+            return
 
-        
-        self.scraper.login(login, password)
-        self.scraper.addProfile('ooliver', 'Oliver Cernansky')
-        self.scraper.crawl()
-        #self.scraper.scrapeProfiles()
+        if self.scraper.login(login, password):
+            #self.scraper.scrapeFriendsRecursively(1000)
+            self.scraper.scrapeProfiles()
+                
 diplo = Crawler4000()
