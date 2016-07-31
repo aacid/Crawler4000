@@ -19,7 +19,8 @@ class Crawler4000(object):
             return
 
         if self.scraper.login(login, password):
-            self.scraper.scrapeFriendsRecursively(10)
+            limit = self.config.getScrapeLimit()
+            self.scraper.scrapeFriendsRecursively(limit)
             self.scraper.scrapeProfiles()
                 
 diplo = Crawler4000()
