@@ -2,7 +2,7 @@ import sys, re
 from source.Profile import Profile
 from bs4 import BeautifulSoup
 
-class FriendManager(object):
+class FriendScraper(object):
     """manages all profiles scraped"""
 
     def __init__(self, id):
@@ -55,7 +55,7 @@ class FriendManager(object):
         print "scraped " + str(counter) + ", could not scrape " + str(locked) + " profiles"
         
     def save(self, db):
-        db.setPersonFriendsScraped(self.id)
+        db.setFriendsScraped(self.id)
 
         print "saving " + str(len(self.profiles)) + " profiles"
         if len(self.profiles) == 0:

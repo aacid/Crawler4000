@@ -16,7 +16,7 @@ class Profile(object):
         
     @staticmethod
     def loadProfile(id, db):
-        name, profile_scraped, friends_scraped = db.getPerson(id)
+        name, profile_scraped, friends_scraped = db.getProfile(id)
 
         profile = Profile(id, name)
         profile.scraped = profile_scraped == 'Y'
@@ -24,7 +24,7 @@ class Profile(object):
         return profile
     
     def save(self, db):
-        db.addPerson(self.id, self.name)
+        db.addProfile(self.id, self.name)
         
         if self.scraped:
             info_list = []
@@ -45,7 +45,7 @@ class Profile(object):
                 info_list.append(('BasicInfo', name, value))
 
             list = [ (self.id,) + x for x in info_list ]
-            db.addPersonalInfo(self.id, list)
+            db.addDetails(list)
             print "saved " + str(len(list)) + " details"
 
 

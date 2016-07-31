@@ -1,6 +1,6 @@
 import mechanize, re, sys
 from bs4 import BeautifulSoup
-from source.FriendManager import FriendManager
+from source.FriendManager import FriendScraper
 from source.Profile import Profile
 
 class FBManager(object):
@@ -41,35 +41,37 @@ class FBManager(object):
         print 'Successfuly logged into Facebook as user ' + name + '.'
 
          
-        self.db.addPerson(username, name)
-        self.db.setPersonProfileScraped(username)
+        self.db.addProfile(username, name)
+        self.db.setProfileScraped(username)
 
         return True
                 
     def scrapeFriendsRecursively(self, limit):
         counter = 0
+        print 'Getting friends of first ' + str(limit) + ' profiles.'
         while counter < limit:
-            person_id = self.db.getPersonWithNoFriends()
-            if person_id == None:
+            profile_id = self.db.getProfileWithNoFriends()
+            if profile_id == None:
                 return
             counter += 1
-            self.scrapeFriends(person_id)
+            print 'Profile #' + str(counter) + ':'
+            self.scrapeFriends(profile_id)
 
     def scrapeFriends(self, id):
-        person = FriendManager(id)
-        person.getFriends(self.browser)
-        person.save(self.db)
+        scraper = FriendScraper(id)
+        scraper.getFriends(self.browser)
+        scraper.save(self.db)
 
     def scrapeProfiles(self):
         counter = 0
         while True:
-            person_id = self.db.getPersonWithNoProfile()
-            if person_id == None:
+            profile_id = self.db.getProfileWithNoDetails()
+            if profile_id == None:
                 return
             counter += 1
-            profile = Profile.loadProfile(person_id, self.db)
+            profile = Profile.loadProfile(profile_id, self.db)
             profile.scrapeProfile(self.browser)
             profile.save(self.db)
-            self.db.setPersonProfileScraped(person_id)
+            self.db.setProfileScraped(profile_id)
             self.db.Commit()
         

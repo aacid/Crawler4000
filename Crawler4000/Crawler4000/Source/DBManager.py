@@ -3,7 +3,7 @@ import sqlite3
 class DBManager(object):
     """manages all interaction with DB"""
     DB_NAME = 'data.db'
-    tables = ['Profiles', 'Friends', 'PersonalInfo']
+    tables = ['Profiles', 'Friends', 'Details']
     is_connected = False
 
     def __init__(self):
@@ -37,20 +37,20 @@ class DBManager(object):
                             );""")
         elif name == 'Friends':
             self.c.execute("""CREATE TABLE `Friends` (
-                                `IdPerson`	TEXT NOT NULL,
+                                `IdProfile`	TEXT NOT NULL,
                                 `IdFriend`	TEXT NOT NULL,
-                                PRIMARY KEY(IdPerson,IdFriend),
-                                FOREIGN KEY(`IdPerson`) REFERENCES Profiles(id),
+                                PRIMARY KEY(IdProfile,IdFriend),
+                                FOREIGN KEY(`IdProfile`) REFERENCES Profiles(id),
                                 FOREIGN KEY(`IdFriend`) REFERENCES Profiles(id)
                             );""")
-        elif name == 'PersonalInfo':
-            self.c.execute("""CREATE TABLE `PersonalInfo` (
-                                `IdPerson`	TEXT NOT NULL,
+        elif name == 'Details':
+            self.c.execute("""CREATE TABLE `Details` (
+                                `IdProfile`	TEXT NOT NULL,
                                 `Type`	TEXT NOT NULL,
                                 `Name`	TEXT,
                                 `Info`	TEXT NOT NULL,
-                                PRIMARY KEY(IdPerson,Type,Info),
-                                FOREIGN KEY(`IdPerson`) REFERENCES Profiles(id)
+                                PRIMARY KEY(IdProfile,Type,Info),
+                                FOREIGN KEY(`IdProfile`) REFERENCES Profiles(id)
                             );""")
 
     def checkConsistency(self):
@@ -72,64 +72,49 @@ class DBManager(object):
         if counter == 0:
             print "DB Error: could not commit."
 
-    def addPerson(self, id, name):
+    def addProfile(self, id, name):
         try:
             self.c.execute("INSERT OR IGNORE INTO Profiles (id, Name) VALUES (?, ?)", (id, name))
         except sqlite3.Error as er:
-            print 'AddPerson:', er.message
-
-    def addPersons(self, list):
-        query =  "INSERT OR IGNORE INTO Profiles VALUES"
-        for person in list:
-            query += " (" + list[0] + ", " + list[1] + "),"
-        query = query[:-1] + ";"
-
-        try:
-            self.c.execute(query)
-        except sqlite3.Error as er:
-            print 'AddPersons:', er.message
+            print 'DB AddProfile:', er.message
 
     def createConnection(self, id, friend):
         try:
-            self.c.execute("INSERT OR IGNORE INTO Friends (IdPerson, IdFriend) VALUES (?, ?)", (id, friend))
+            self.c.execute("INSERT OR IGNORE INTO Friends (IdProfile, IdFriend) VALUES (?, ?)", (id, friend))
         except sqlite3.Error as er:
-            print 'CreateConnection:', er.message
+            print 'DB CreateConnection:', er.message
 
-    def setPersonProfileScraped(self, id):
+    def setProfileScraped(self, id):
         try:
             self.c.execute("UPDATE Profiles SET ProfileScraped = ? WHERE id = ?", ('Y', id))
         except sqlite3.Error as er:
-            print 'SetProfileScraped:', er.message
+            print 'DB SetProfileScraped:', er.message
 
-    def setPersonFriendsScraped(self, id):
+    def setFriendsScraped(self, id):
         try:
             self.c.execute("UPDATE Profiles SET FriendsScraped = ? WHERE id = ?", ('Y', id))
         except sqlite3.Error as er:
-            print 'SetFriendsScraped:', er.message
+            print 'DB SetFriendsScraped:', er.message
 
-    def getPerson(self, id):
+    def getProfile(self, id):
         self.c.execute("SELECT Name, ProfileScraped, FriendsScraped FROM Profiles WHERE id = ?", (id,))
         result = self.c.fetchone()
         return result
     
-    def getPersonInfo(self, id):
-        self.c.execute("SELECT * FROM PersonalInfo WHERE IdPerson = ?", (id,))
-        return self.c.fetchall()
-
-    def getPersonWithNoProfile(self):
+    def getProfileWithNoDetails(self):
         self.c.execute("SELECT id FROM Profiles WHERE ProfileScraped = 'N' LIMIT 1")
         result = self.c.fetchone()
         return result[0]
     
-    def getPersonWithNoFriends(self):
+    def getProfileWithNoFriends(self):
         self.c.execute("SELECT id FROM Profiles WHERE FriendsScraped = 'N' LIMIT 1")
         result = self.c.fetchone()
         return result[0]
         
-    def addPersonalInfo(self, person_id, list):
-        query =  "INSERT OR IGNORE INTO PersonalInfo (IdPerson, Type, Name, Info) VALUES (?, ?, ?, ?)"
+    def addDetails(self, list):
+        query =  "INSERT OR IGNORE INTO Details (IdProfile, Type, Name, Info) VALUES (?, ?, ?, ?)"
 
         try:
             self.c.executemany(query, list)
         except sqlite3.Error as er:
-            print 'AddPersonalInfo:', er.message
+            print 'DB AddDetails:', er.message

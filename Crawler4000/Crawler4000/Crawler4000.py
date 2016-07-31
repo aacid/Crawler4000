@@ -1,7 +1,6 @@
 from source.ConfigManager import ConfigManager
 from source.DBManager import DBManager
 from source.FBManager import FBManager
-from source.FriendManager import FriendManager
 
 class Crawler4000(object):
     def __init__(self):
@@ -20,7 +19,7 @@ class Crawler4000(object):
             return
 
         if self.scraper.login(login, password):
-            #self.scraper.scrapeFriendsRecursively(1000)
+            self.scraper.scrapeFriendsRecursively(10)
             self.scraper.scrapeProfiles()
                 
 diplo = Crawler4000()
