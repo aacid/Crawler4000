@@ -48,6 +48,52 @@ class Profile(object):
             db.addDetails(list)
             print "saved " + str(len(list)) + " details"
 
+    def getFriends(self, browser, db):
+
+        print "getting friends of " + self.id
+        counter = 0
+        locked = 0
+        
+        profile_links = []
+        while True:
+            try:
+                response = browser.open('https://m.facebook.com/' + self.id + "/friends?startindex=" + str(counter))
+                data = response.read()
+
+                soup = BeautifulSoup(data, "html.parser")
+                soup = soup.find(id='objects_container')
+                tables = soup.find_all('tbody')
+
+                if len(tables) == 0:
+                    break
+                for table in tables:
+                    link = table.find('a')
+                    if link.has_attr('href'):
+                        profile_links.append((unicode(link.contents[0]), link['href']))
+                    else:
+                        locked += 1
+                    counter += 1
+            except:
+                print("Unexpected error:", sys.exc_info()[0])
+         
+        for name, link in profile_links:
+            if "profile.php" in link:
+                match = re.search(r'\/(.*)\&', link)
+            else:
+                match = re.search(r'\/(.*)\?', link)
+            if match:
+                fbid = match.group(1)
+            else:
+                fbid = ''
+            profile = Profile(fbid, name)            
+            profile.save(db)
+            profile.setFriendOf(db, self.id)
+
+        db.setFriendsScraped(self.id)
+        
+        db.Commit()
+
+        print "scraped " + str(counter) + ", could not scrape " + str(locked) + " profiles"
 
     def scrapeProfile(self, browser):    
         print "scraping profile " + self.id
@@ -137,3 +183,6 @@ class Profile(object):
                         continue
                     self.basic_info.append((content, val))
                     break
+
+    def setFriendOf(self, db, friend_id):
+        db.createConnection(friend_id, self.id)

@@ -27,9 +27,6 @@
     <Compile Include="source\FBManager.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="source\FriendManager.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="source\Profile.py">
       <SubType>Code</SubType>
     </Compile>

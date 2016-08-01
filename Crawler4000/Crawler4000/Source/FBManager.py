@@ -1,6 +1,5 @@
 import mechanize, re, sys
 from bs4 import BeautifulSoup
-from source.FriendManager import FriendScraper
 from source.Profile import Profile
 
 class FBManager(object):
@@ -55,13 +54,9 @@ class FBManager(object):
                 return
             counter += 1
             print 'Profile #' + str(counter) + ':'
-            self.scrapeFriends(profile_id)
-
-    def scrapeFriends(self, id):
-        scraper = FriendScraper(id)
-        scraper.getFriends(self.browser)
-        scraper.save(self.db)
-
+            profile = Profile.loadProfile(profile_id, self.db)
+            profile.getFriends(self.browser, self.db)
+            
     def scrapeProfiles(self):
         counter = 0
         while True:
