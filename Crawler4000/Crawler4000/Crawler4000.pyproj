@@ -21,24 +21,12 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="source\ConfigManager.py" />
+    <Compile Include="ConfigManager.py" />
     <Compile Include="Crawler4000.py" />
-    <Compile Include="source\DBManager.py" />
-    <Compile Include="source\FBManager.py">
+    <Compile Include="DBManager.py" />
+    <Compile Include="Profile.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="source\Profile.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="source\__init__.py">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="source\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="TODO.txt" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

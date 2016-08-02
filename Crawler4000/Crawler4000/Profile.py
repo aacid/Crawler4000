@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import re
 class Profile(object):
-    """description of class"""
+    """Object representation of Facebook Profile"""
 
     def __init__(self, id, name):
         self.id = id
