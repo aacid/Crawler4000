@@ -87,15 +87,13 @@ class Profile(object):
                 fbid = ''
             profile = Profile(fbid, name)            
             profile.save(db)
-            profile.setFriendOf(db, self.id)
+            profile.setFriendOf(db, self.id)         
 
         db.setFriendsScraped(self.id)
-        
-        db.Commit()
-
+        db.Commit()      
         print "scraped " + str(counter) + ", could not scrape " + str(locked) + " profiles"
 
-    def scrapeProfile(self, browser):    
+    def scrapeProfile(self, browser, db):    
         print "scraping profile " + self.id
         if 'profile' in self.id:
             url = 'https://m.facebook.com/' + self.id.replace('?', '?v=info&')
@@ -109,6 +107,10 @@ class Profile(object):
             pass
 
         self.scraped = True
+        db.setProfileScraped(self.id)
+        self.save(db)        
+        db.Commit()
+
 
     def scrapeAbout(self, data):        
         soup = BeautifulSoup(data, "html.parser")

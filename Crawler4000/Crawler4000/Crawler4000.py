@@ -79,10 +79,7 @@ class Crawler4000(object):
                 return
             counter += 1
             profile = Profile.loadProfile(profile_id, self.db)
-            profile.scrapeProfile(self.browser)
-            profile.save(self.db)
-            self.db.setProfileScraped(profile_id)
-            self.db.Commit()
+            profile.scrapeProfile(self.browser, self.db)          
                 
 crawler = Crawler4000()
 crawler.doWork()
