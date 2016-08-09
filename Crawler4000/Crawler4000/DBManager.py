@@ -3,7 +3,7 @@ import sqlite3
 class DBManager(object):
     """manages all interaction with DB"""
     DB_NAME = 'data.db'
-    tables = ['Profiles', 'Friends', 'Details']
+    TABLES = ['Profiles', 'Friends', 'Details']
     is_connected = False
 
     def __init__(self):
@@ -17,7 +17,7 @@ class DBManager(object):
 
         self.is_connected = True
 
-        self.checkConsistency()
+        self.checkTables()
 
     def __del__(self):
         self.conn.commit()
@@ -25,6 +25,12 @@ class DBManager(object):
 
     def isConnected(self):
         return self.is_connected
+    
+    def checkTables(self):
+        for table in self.TABLES:
+            self.c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
+            if self.c.fetchone() == None:
+                self.createTable(table)
 
     def createTable(self, name):
         if name == 'Profiles':
@@ -52,13 +58,6 @@ class DBManager(object):
                                 PRIMARY KEY(IdProfile,Type,Info),
                                 FOREIGN KEY(`IdProfile`) REFERENCES Profiles(id)
                             );""")
-
-    def checkConsistency(self):
-        for table in self.tables:
-            self.c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
-            if self.c.fetchone() == None:
-                self.createTable(table)
-
 
     def Commit(self):
         counter = 3
@@ -97,7 +96,7 @@ class DBManager(object):
             print 'DB SetFriendsScraped:', er.message
 
     def getProfile(self, id):
-        self.c.execute("SELECT Name, ProfileScraped, FriendsScraped FROM Profiles WHERE id = ?", (id,))
+        self.c.execute("SELECT Name, ProfileScraped FROM Profiles WHERE id = ?", (id,))
         result = self.c.fetchone()
         return result
     

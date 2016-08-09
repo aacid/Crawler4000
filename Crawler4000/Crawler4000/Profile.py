@@ -7,7 +7,6 @@ class Profile(object):
         self.id = id
         self.name = name
         self.scraped = False
-        self.friends_scraped = False
         self.workplaces = []
         self.education = []
         self.living = []
@@ -16,11 +15,10 @@ class Profile(object):
         
     @staticmethod
     def loadProfile(id, db):
-        name, profile_scraped, friends_scraped = db.getProfile(id)
+        name, profile_scraped = db.getProfile(id)
 
         profile = Profile(id, name)
         profile.scraped = profile_scraped == 'Y'
-        profile.friends_scraped = friends_scraped == 'Y'
         return profile
     
     def save(self, db):
